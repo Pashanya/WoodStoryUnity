@@ -6885,12 +6885,12 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 978205371}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: WallCheckUp
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
+  m_StaticEditorFlags: 2147483647
   m_IsActive: 1
 --- !u!4 &978205371
 Transform:
@@ -37444,12 +37444,12 @@ GameObject:
   - component: {fileID: 1651188415}
   - component: {fileID: 1651188414}
   - component: {fileID: 1651188416}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: Player
   m_TagString: Player
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
+  m_StaticEditorFlags: 2147483647
   m_IsActive: 1
 --- !u!61 &1651188410
 BoxCollider2D:
@@ -37515,7 +37515,7 @@ Rigidbody2D:
   m_Material: {fileID: 0}
   m_IncludeLayers:
     serializedVersion: 2
-    m_Bits: 0
+    m_Bits: 256
   m_ExcludeLayers:
     serializedVersion: 2
     m_Bits: 0
@@ -37605,7 +37605,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   knockbackDuration: 0.4
-  wallCheckRayDistance: 0.34
+  wallCheckRayDistance: 0.52
   canLedge: 1
   onLedge: 0
   ledgeRayCorrectY: 0.68
@@ -37766,12 +37766,12 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1678450263}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: GroundCheck
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
+  m_StaticEditorFlags: 2147483647
   m_IsActive: 1
 --- !u!4 &1678450263
 Transform:
@@ -37800,6 +37800,10 @@ PrefabInstance:
       propertyPath: m_LocalPosition.x
       value: 0.71
       objectReference: {fileID: 0}
+    - target: {fileID: 2267455537189220507, guid: 271bcb950300ed1489106d370747ec27, type: 3}
+      propertyPath: m_IncludeLayers.m_Bits
+      value: 512
+      objectReference: {fileID: 0}
     - target: {fileID: 3583463980322572047, guid: 271bcb950300ed1489106d370747ec27, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0.315
@@ -37820,9 +37824,17 @@ PrefabInstance:
       propertyPath: wallLayer.m_Bits
       value: 192
       objectReference: {fileID: 0}
+    - target: {fileID: 7018369269673266321, guid: 271bcb950300ed1489106d370747ec27, type: 3}
+      propertyPath: m_Layer
+      value: 9
+      objectReference: {fileID: 0}
     - target: {fileID: 7791566720880703171, guid: 271bcb950300ed1489106d370747ec27, type: 3}
       propertyPath: m_Name
       value: Blob
+      objectReference: {fileID: 0}
+    - target: {fileID: 7791566720880703171, guid: 271bcb950300ed1489106d370747ec27, type: 3}
+      propertyPath: m_Layer
+      value: 9
       objectReference: {fileID: 0}
     - target: {fileID: 8152965167100999958, guid: 271bcb950300ed1489106d370747ec27, type: 3}
       propertyPath: m_Sprite
@@ -37851,6 +37863,10 @@ PrefabInstance:
     - target: {fileID: 8569851045685777756, guid: 271bcb950300ed1489106d370747ec27, type: 3}
       propertyPath: m_SpriteTilingProperty.oldSize.y
       value: 1.625
+      objectReference: {fileID: 0}
+    - target: {fileID: 8764713167896500160, guid: 271bcb950300ed1489106d370747ec27, type: 3}
+      propertyPath: m_Layer
+      value: 9
       objectReference: {fileID: 0}
     - target: {fileID: 8772358797047145653, guid: 271bcb950300ed1489106d370747ec27, type: 3}
       propertyPath: m_LocalPosition.x

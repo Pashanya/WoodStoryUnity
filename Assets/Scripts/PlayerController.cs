@@ -97,7 +97,7 @@ public class PlayerController : MonoBehaviour
             StartCoroutine(Dash());
         }
 
-        if (rb.velocity.y < 0 && rb.velocity.y > -40)
+        if (rb.velocity.y < 0 && rb.velocity.y > -40 && !canLedge)
         {
             rb.velocity -= vecGravity * fallMultiplier * Time.deltaTime;
             // Debug.Log(rb.velocity);
@@ -161,7 +161,7 @@ public class PlayerController : MonoBehaviour
                 doubleJump = true;
                 rb.gravityScale = 0;
                 rb.velocity = new Vector2(0, 0);
-                offsetCalculateAndCorrect();
+                OffsetCalculateAndCorrect();
             }
         }  else
         {
@@ -171,7 +171,7 @@ public class PlayerController : MonoBehaviour
 
     private float minCorrectDistance = .01f;
 
-    void offsetCalculateAndCorrect()
+    void OffsetCalculateAndCorrect()
     {
         
         offsetY = Physics2D.Raycast(
@@ -305,6 +305,8 @@ public class PlayerController : MonoBehaviour
 
     private IEnumerator Dash()
     {
+        rb.excludeLayers = LayerMask.GetMask("Enemy"); // deactivate collision
+        canTakeDamage = false;
         canDash = false;
         isDashing = true;
         rb.gravityScale = 0f;
@@ -314,8 +316,10 @@ public class PlayerController : MonoBehaviour
         trail.emitting = false;
         rb.gravityScale = gravityDef;
         isDashing = false;
+        rb.excludeLayers = -0; // activate collision
         yield return new WaitForSeconds(dashingCooldown);
         canDash = true;
+        canTakeDamage = true;
     }
 
     private void UpdateAnimationState()
@@ -342,6 +346,11 @@ public class PlayerController : MonoBehaviour
             state = MovementState.fall;
         }
 
+        if (onLedge)
+        {
+            state = MovementState.grab;
+        }
+
         anim.SetInteger("state", (int)state);
     }
 
@@ -354,7 +363,7 @@ public class PlayerController : MonoBehaviour
 
     private void OnCollisionStay2D(Collision2D other)
     {
-        if (other.gameObject.CompareTag("Enemy") && canTakeDamage)
+        if (other.gameObject.CompareTag("Enemy") && canTakeDamage && false)
         {
             StartCoroutine(DamageCooldown());
             health--;
