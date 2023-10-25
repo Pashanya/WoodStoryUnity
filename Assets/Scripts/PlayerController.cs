@@ -1,12 +1,12 @@
 using System.Collections;
 using TMPro;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class PlayerController : MonoBehaviour
 {
     private Rigidbody2D rb;
     private BoxCollider2D coll;
-    private Animator anim;
 
     private bool canDash = true;
     private bool isDashing;
@@ -14,11 +14,11 @@ public class PlayerController : MonoBehaviour
     private float dashingTime = 0.2f;
     private float dashingCooldown = 1f;
 
-    private bool isJumping;
-    private bool doubleJump;
+    [SerializeField] private bool isJumping;
+    [SerializeField] private bool doubleJump;
     private bool isJumpingFalling;
-    private float coyoteTime = .2f;
-    private float coyoteTimeCounter;
+    private float coyoteTime = .3f;
+    [SerializeField] private float coyoteTimeCounter;
 
     private float jumpBufferTime = .1f;
     private float jumpBufferCounter;
@@ -43,10 +43,15 @@ public class PlayerController : MonoBehaviour
     public float ledgeRayCorrectY = 0.5f;
     public float offsetY;
 
+    [SerializeField] private float scaleMin = 0.75f;
+    [SerializeField] private float scaleMax = 1.25f;
+
     private float gravityDef;
     private float horizontal;
     private int wallDirection;
     private bool isFacingRight = true;
+    [SerializeField] private GameObject animatorObject;
+    private Animator anim;
     [SerializeField] public int health = 10;
     [SerializeField] private float speed = 12f;
     [SerializeField] private float jumpPower = 30f;
@@ -72,7 +77,7 @@ public class PlayerController : MonoBehaviour
         vecGravity = new Vector2(0, -Physics2D.gravity.y);
         rb = GetComponent<Rigidbody2D>();
         coll = GetComponent<BoxCollider2D>();
-        anim = GetComponent<Animator>();
+        anim = animatorObject.GetComponent<Animator>();
         gravityDef = rb.gravityScale;
     }
 
@@ -129,6 +134,11 @@ public class PlayerController : MonoBehaviour
 
     void CheckingLedge()
     {
+        if (onLedge && Input.GetAxis("Vertical") < 0)
+        {
+            StartCoroutine(LedgeCooldown());
+        }
+
         if (!IsOnGround() && canLedge)
         {
             onWallUp = Physics2D.Raycast(wallCheckUp.position,
@@ -163,7 +173,8 @@ public class PlayerController : MonoBehaviour
                 rb.velocity = new Vector2(0, 0);
                 OffsetCalculateAndCorrect();
             }
-        }  else
+        }
+        else
         {
             onLedge = false;
         }
@@ -173,7 +184,6 @@ public class PlayerController : MonoBehaviour
 
     void OffsetCalculateAndCorrect()
     {
-        
         offsetY = Physics2D.Raycast(
             new Vector2(wallCheckUp.position.x + wallCheckRayDistance * transform.localScale.x,
                 wallCheckUp.position.y + ledgeRayCorrectY),
@@ -216,7 +226,7 @@ public class PlayerController : MonoBehaviour
 
     void HandleJump()
     {
-        if (IsOnGround())
+        if (IsOnGround() && !isJumping)
         {
             coyoteTimeCounter = coyoteTime;
         }
@@ -228,11 +238,7 @@ public class PlayerController : MonoBehaviour
         if (Input.GetButtonDown("Jump"))
         {
             jumpBufferCounter = jumpBufferTime;
-            if (onLedge)
-            {
-                onLedge = false;
-                rb.gravityScale = gravityDef;
-            }
+
             StartCoroutine(LedgeCooldown());
         }
         else
@@ -240,14 +246,17 @@ public class PlayerController : MonoBehaviour
             jumpBufferCounter -= Time.deltaTime;
         }
 
-        if (jumpBufferCounter > 0f && (coyoteTimeCounter > 0f || doubleJump) && !isJumping)
+        if (jumpBufferCounter > 0f && (coyoteTimeCounter > 0f || doubleJump))
         {
+            JumpScale(scaleMin, scaleMax);
+
             if (coyoteTimeCounter < 0f)
                 doubleJump = false;
 
             rb.velocity = new Vector2(rb.velocity.x, jumpPower);
 
             jumpBufferCounter = 0f;
+            coyoteTimeCounter = 0;
 
             StartCoroutine(JumpCooldown());
         }
@@ -255,27 +264,10 @@ public class PlayerController : MonoBehaviour
 
     private bool IsOnGround()
     {
-        
         RaycastHit2D hit = Physics2D.BoxCast(coll.bounds.center, coll.bounds.size, 0f, Vector2.down, .2f, groundLayer);
-
-        
-        if (hit.collider != null)
-        {
-            Debug.DrawLine(coll.bounds.center, hit.point, Color.red);
-        }
-        else
-        {
-            Debug.DrawRay(coll.bounds.center, Vector2.down * 0.2f, Color.green);
-        }
-
         return hit;
 
         // return Physics2D.OverlapCircle(groundCheck.position, .2f, groundLayer);
-    }
-
-    private bool IsOnWall()
-    {
-        return false;
     }
 
     private void Flip()
@@ -291,6 +283,12 @@ public class PlayerController : MonoBehaviour
 
     private IEnumerator LedgeCooldown()
     {
+        if (onLedge)
+        {
+            onLedge = false;
+            rb.gravityScale = gravityDef;
+        }
+
         canLedge = false;
         yield return new WaitForSeconds(0.2f);
         canLedge = true;
@@ -299,7 +297,7 @@ public class PlayerController : MonoBehaviour
     private IEnumerator JumpCooldown()
     {
         isJumping = true;
-        yield return new WaitForSeconds(0.1f);
+        yield return new WaitForSeconds(0.3f);
         isJumping = false;
     }
 
@@ -324,7 +322,32 @@ public class PlayerController : MonoBehaviour
 
     private void UpdateAnimationState()
     {
+        // TODO make func for this
+        Vector3 localScale = animatorObject.transform.localScale;
+        localScale.x = Mathf.Lerp(localScale.x, Mathf.Sign(localScale.x) * 1.0f, 0.05f);
+        localScale.y = Mathf.Lerp(localScale.y, 1.0f, 0.05f);
+        animatorObject.transform.localScale = localScale;
+
+
+        var animPosition = animatorObject.transform.localPosition;
+        if (animPosition.y < 0)
+        {
+            animPosition.y = Mathf.Lerp(animPosition.y, 0, 0.05f);
+            animatorObject.transform.localPosition = new Vector3(animPosition.x, animPosition.y, animPosition.z);
+        }
+        else
+        {
+            animatorObject.transform.localPosition = new Vector3(animPosition.x, 0, animPosition.z);
+        }
+        
         MovementState state;
+
+        if (anim.GetInteger("state") == (int)MovementState.fall && IsOnGround())
+        {
+            animatorObject.transform.localPosition = new Vector3(animPosition.x, animPosition.y - 0.5f, animPosition.z);
+            JumpScale(scaleMax, scaleMin);
+        }
+        
         if (horizontal != 0f)
         {
             if (IsOnGround()) state = MovementState.run;
@@ -345,7 +368,7 @@ public class PlayerController : MonoBehaviour
         {
             state = MovementState.fall;
         }
-
+        
         if (onLedge)
         {
             state = MovementState.grab;
@@ -363,7 +386,7 @@ public class PlayerController : MonoBehaviour
 
     private void OnCollisionStay2D(Collision2D other)
     {
-        if (other.gameObject.CompareTag("Enemy") && canTakeDamage && false)
+        if (other.gameObject.CompareTag("Enemy") && canTakeDamage)
         {
             StartCoroutine(DamageCooldown());
             health--;
@@ -395,6 +418,15 @@ public class PlayerController : MonoBehaviour
 
             Invoke(nameof(StopKnockbacking), knockbackDuration);
         }
+    }
+
+    private void JumpScale(float scaleX, float scaleY)
+    {
+        //anim jump
+        Vector3 localScale = animatorObject.transform.localScale;
+        localScale.x = Mathf.Sign(localScale.x) * scaleX;
+        localScale.y = scaleY;
+        animatorObject.transform.localScale = localScale;
     }
 
     private void StopKnockbacking()
